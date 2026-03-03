@@ -1,5 +1,18 @@
-const Anthropic = require('@anthropic-ai/sdk');
 const { buildReviewSystemPrompt, buildReviewUserPrompt } = require('./prompts');
+
+/**
+ * Dynamically load the Anthropic SDK.
+ * @returns {Object} The Anthropic class
+ */
+function loadAnthropicSDK() {
+    try {
+        return require('@anthropic-ai/sdk');
+    } catch {
+        throw new Error(
+            'Claude SDK not installed. Run: npm install @anthropic-ai/sdk'
+        );
+    }
+}
 
 /**
  * Create an Anthropic client instance.
@@ -14,6 +27,7 @@ function createClient() {
             'Then set it: export ANTHROPIC_API_KEY=your-key-here'
         );
     }
+    const Anthropic = loadAnthropicSDK();
     return new Anthropic({ apiKey });
 }
 

@@ -8,14 +8,20 @@ AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git bra
 npm install ai-code-review
 ```
 
-Or as a local dependency:
-```json
-{
-  "devDependencies": {
-    "ai-code-review": "file:../ai-code-review"
-  }
-}
+Then install **only the SDK for the provider you want to use**:
+
+```bash
+# If using Claude (Anthropic)
+npm install @anthropic-ai/sdk
+
+# If using Gemini (Google)
+npm install @google/genai
+
+# If you want both available
+npm install @anthropic-ai/sdk @google/genai
 ```
+
+> Neither SDK is installed automatically. You only pay for what you use.
 
 ## Setup
 

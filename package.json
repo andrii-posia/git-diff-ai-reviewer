@@ -20,8 +20,16 @@
   ],
   "author": "",
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@google/genai": "^0.14.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    },
+    "@google/genai": {
+      "optional": true
+    }
   }
 }
