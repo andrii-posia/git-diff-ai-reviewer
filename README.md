@@ -32,14 +32,16 @@ npm install --save-dev @anthropic-ai/sdk @google/genai
 
 ## Setup
 
-Set the API key for your chosen provider:
+Set the API key for your chosen provider. You can set these as environment variables, or simply create a `.env` file in the root of your project:
 
 ```bash
+# .env file
+
 # For Claude (Anthropic)
-export ANTHROPIC_API_KEY=your-key-here
+ANTHROPIC_API_KEY=your-key-here
 
 # For Gemini (Google)
-export GEMINI_API_KEY=your-key-here
+GEMINI_API_KEY=your-key-here
 ```
 
 ## Usage
@@ -129,9 +131,9 @@ Create `.ai-review.config.json` in your project root:
 
 ```json
 {
-  "provider": "claude",
+  "provider": "gemini",
   "baseBranch": "main",
-  "model": "",
+  "model": "gemini-2.0-flash",
   "maxTokens": 4096,
   "outputDir": "./reviews",
   "reviewRules": "standard"
