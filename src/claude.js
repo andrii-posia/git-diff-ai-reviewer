@@ -130,9 +130,9 @@ async function reviewCode(diff, options = {}) {
  * @returns {{ critical: number, warning: number, suggestion: number }}
  */
 function parseSeverityCounts(reviewText) {
-    const critical = (reviewText.match(/\[SEVERITY\]\s*CRITICAL/gi) || []).length;
-    const warning = (reviewText.match(/\[SEVERITY\]\s*WARNING/gi) || []).length;
-    const suggestion = (reviewText.match(/\[SEVERITY\]\s*SUGGESTION/gi) || []).length;
+    const critical = (reviewText.match(/(?:\[SEVERITY\]\s*CRITICAL|\[CRITICAL\])/gi) || []).length;
+    const warning = (reviewText.match(/(?:\[SEVERITY\]\s*WARNING|\[WARNING\])/gi) || []).length;
+    const suggestion = (reviewText.match(/(?:\[SEVERITY\]\s*SUGGESTION|\[SUGGESTION\])/gi) || []).length;
 
     return { critical, warning, suggestion };
 }
