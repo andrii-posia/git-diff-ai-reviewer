@@ -1,0 +1,27 @@
+{
+  "name": "ai-code-review",
+  "version": "1.0.0",
+  "description": "AI-powered code review using Claude or Gemini API. Reviews git branch diffs and generates actionable fix prompts.",
+  "main": "src/index.js",
+  "bin": {
+    "ai-review": "./bin/review.js"
+  },
+  "scripts": {
+    "test": "node bin/review.js --help"
+  },
+  "keywords": [
+    "code-review",
+    "ai",
+    "claude",
+    "gemini",
+    "linter",
+    "git",
+    "diff"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@google/genai": "^0.14.0"
+  }
+}
