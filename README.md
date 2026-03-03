@@ -1,4 +1,4 @@
-# AI Code Review
+# code-review-ai
 
 AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git branch diffs and generates structured, actionable feedback with severity levels.
 
@@ -8,7 +8,7 @@ AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git bra
 
 ```bash
 # From npm (recommended)
-npm install --save-dev ai-code-review
+npm install --save-dev code-review-ai
 
 # Or directly from GitHub
 npm install --save-dev github:andrii-posia/ai-review
