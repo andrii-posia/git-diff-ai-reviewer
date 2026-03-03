@@ -18,7 +18,7 @@
     "git",
     "diff"
   ],
-  "author": "",
+  "author": "Andrii Posia",
   "license": "MIT",
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
