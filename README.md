@@ -1,4 +1,4 @@
-# code-review-ai
+# git-diff-ai-reviewer
 
 AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git branch diffs and generates structured, actionable feedback with severity levels.
 
@@ -8,7 +8,7 @@ AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git bra
 
 ```bash
 # From npm (recommended)
-npm install --save-dev code-review-ai
+npm install --save-dev git-diff-ai-reviewer
 
 # Or directly from GitHub
 npm install --save-dev github:andrii-posia/ai-review
@@ -48,20 +48,20 @@ export GEMINI_API_KEY=your-key-here
 
 ```bash
 # Review with auto-detected provider (based on which env var is set)
-code-review-ai review
+git-diff-ai-reviewer review
 
 # Explicitly choose a provider
-code-review-ai review --provider claude
-code-review-ai review --provider gemini
+git-diff-ai-reviewer review --provider claude
+git-diff-ai-reviewer review --provider gemini
 
 # Review against a specific base branch
-code-review-ai review --base develop
+git-diff-ai-reviewer review --base develop
 
 # Preview diff without calling API
-code-review-ai review --dry-run
+git-diff-ai-reviewer review --dry-run
 
 # Generate fix prompt from latest review
-code-review-ai fix
+git-diff-ai-reviewer fix
 ```
 
 ### npm scripts
@@ -70,9 +70,9 @@ Add to your `package.json`:
 ```json
 {
   "scripts": {
-    "review": "code-review-ai review",
-    "review:fix": "code-review-ai fix",
-    "review:dry": "code-review-ai review --dry-run"
+    "review": "git-diff-ai-reviewer review",
+    "review:fix": "git-diff-ai-reviewer fix",
+    "review:dry": "git-diff-ai-reviewer review --dry-run"
   }
 }
 ```
@@ -172,7 +172,7 @@ const {
   getChangedFiles,
   detectProvider,
   STANDARD_RULES,
-} = require('code-review-ai');
+} = require('git-diff-ai-reviewer');
 
 const diff = getDiff('main');
 const files = getChangedFiles('main');
@@ -196,7 +196,7 @@ Review outputs are saved to `./reviews/` (configurable):
 ```yaml
 # GitHub Actions example
 - name: AI Code Review
-  run: npx code-review-ai review --provider claude
+  run: npx git-diff-ai-reviewer review --provider claude
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
