@@ -48,20 +48,20 @@ export GEMINI_API_KEY=your-key-here
 
 ```bash
 # Review with auto-detected provider (based on which env var is set)
-ai-review review
+code-review-ai review
 
 # Explicitly choose a provider
-ai-review review --provider claude
-ai-review review --provider gemini
+code-review-ai review --provider claude
+code-review-ai review --provider gemini
 
 # Review against a specific base branch
-ai-review review --base develop
+code-review-ai review --base develop
 
 # Preview diff without calling API
-ai-review review --dry-run
+code-review-ai review --dry-run
 
 # Generate fix prompt from latest review
-ai-review fix
+code-review-ai fix
 ```
 
 ### npm scripts
@@ -70,9 +70,9 @@ Add to your `package.json`:
 ```json
 {
   "scripts": {
-    "review": "ai-review review",
-    "review:fix": "ai-review fix",
-    "review:dry": "ai-review review --dry-run"
+    "review": "code-review-ai review",
+    "review:fix": "code-review-ai fix",
+    "review:dry": "code-review-ai review --dry-run"
   }
 }
 ```
@@ -172,7 +172,7 @@ const {
   getChangedFiles,
   detectProvider,
   STANDARD_RULES,
-} = require('ai-code-review');
+} = require('code-review-ai');
 
 const diff = getDiff('main');
 const files = getChangedFiles('main');
@@ -196,7 +196,7 @@ Review outputs are saved to `./reviews/` (configurable):
 ```yaml
 # GitHub Actions example
 - name: AI Code Review
-  run: npx ai-review review --provider claude
+  run: npx code-review-ai review --provider claude
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
