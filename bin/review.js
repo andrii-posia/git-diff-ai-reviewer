@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const { getDiff, getChangedFiles, getBranchName, isGitRepo } = require('../src/git');
