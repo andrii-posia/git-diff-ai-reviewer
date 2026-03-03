@@ -11,7 +11,7 @@ AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git bra
 npm install --save-dev git-diff-ai-reviewer
 
 # Or directly from GitHub
-npm install --save-dev github:andrii-posia/ai-review
+npm install --save-dev github:andrii-posia/git-diff-ai-reviewer
 ```
 
 Then install **only the SDK for the provider you want to use** (also as devDependencies):

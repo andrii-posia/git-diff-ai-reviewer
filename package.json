@@ -20,6 +20,14 @@
   ],
   "author": "Andrii Posia",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrii-posia/git-diff-ai-reviewer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/andrii-posia/git-diff-ai-reviewer/issues"
+  },
+  "homepage": "https://github.com/andrii-posia/git-diff-ai-reviewer#readme",
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@google/genai": "^0.14.0"
