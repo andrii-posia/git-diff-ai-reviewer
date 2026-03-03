@@ -1,6 +1,6 @@
 {
   "name": "git-diff-ai-reviewer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "AI-powered code review using Claude or Gemini API. Reviews git branch diffs and generates actionable fix prompts.",
   "main": "src/index.js",
   "bin": {
