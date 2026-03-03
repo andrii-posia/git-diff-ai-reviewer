@@ -20,6 +20,28 @@ function buildReviewSystemPrompt(options = {}) {
 
     return `You are an expert code reviewer. You review git diffs and provide actionable, specific feedback.
 
+You will receive:
+1. A git diff showing the code changes.
+2. Code context — the full functions/classes where changes were made, their imports, and where those functions are called (callers/usages).
+
+IMPORTANT — Requesting Additional Context:
+If the provided context is NOT sufficient to give a thorough review (e.g., you need to see a type definition, a helper function, a configuration file, or how something is used elsewhere), you MUST respond with a [CONTEXT_REQUEST] block BEFORE your review. Format:
+
+[CONTEXT_REQUEST]
+- FILE: path/to/file.js LINES: 10-50
+- FILE: path/to/file.js FUNCTION: helperFunctionName
+- CALLERS: someFunction
+- FILE: path/to/config.json
+[/CONTEXT_REQUEST]
+
+Request types:
+- FILE: path LINES: start-end — Get specific line range from a file
+- FILE: path FUNCTION: name — Get a specific function/class definition
+- CALLERS: functionName — Find all usages/callers of a function
+- FILE: path — Get the full file content (use sparingly)
+
+If the context IS sufficient, skip the [CONTEXT_REQUEST] block and proceed directly with your review.
+
 Your review MUST follow this exact output format for each finding:
 
 ---
@@ -42,13 +64,14 @@ Rules:
 1. Be specific — reference exact file names and line numbers from the diff.
 2. Provide concrete fix suggestions, not vague advice.
 3. Focus on what changed in the diff, not preexisting code.
-4. Group related issues together if they share the same root cause.
-5. At the end, provide a SUMMARY section with counts by severity level.
-6. If the code looks good, say so — don't invent issues.${customRules}`;
+4. Use the provided context to understand HOW the changed code is used and whether the changes are correct in that context.
+5. Group related issues together if they share the same root cause.
+6. At the end, provide a SUMMARY section with counts by severity level.
+7. If the code looks good, say so — don't invent issues.${customRules}`;
 }
 
 /**
- * Build the user message for code review.
+ * Build the user message for code review (without context — legacy).
  * @param {string} diff - The git diff content
  * @param {string[]} changedFiles - List of changed files
  * @param {string} branchName - Current branch name
@@ -66,6 +89,44 @@ ${diff}
 \`\`\`
 
 Provide your review following the structured format specified in your instructions.`;
+}
+
+/**
+ * Build the user message for code review WITH context.
+ * @param {string} diff - The git diff content
+ * @param {string[]} changedFiles - List of changed files
+ * @param {string} branchName - Current branch name
+ * @param {string} formattedContext - Pre-formatted context string
+ * @returns {string}
+ */
+function buildReviewUserPromptWithContext(diff, changedFiles, branchName, formattedContext) {
+    return `Please review the following code changes on branch "${branchName}".
+
+Changed files:
+${changedFiles.map(f => `- ${f}`).join('\n')}
+
+## Code Context
+
+The following is the surrounding context for the changed code — full function bodies, imports, and callers/usages:
+
+${formattedContext}
+
+## Git Diff
+
+\`\`\`diff
+${diff}
+\`\`\`
+
+Review the changes using both the diff and the context provided. If you need additional context to give a thorough review, use the [CONTEXT_REQUEST] format described in your instructions. Otherwise, provide your complete review.`;
+}
+
+/**
+ * Build a follow-up user message containing requested context.
+ * @param {string} formattedFollowUp - Pre-formatted follow-up context string
+ * @returns {string}
+ */
+function buildFollowUpContextMessage(formattedFollowUp) {
+    return formattedFollowUp;
 }
 
 /**
@@ -104,5 +165,8 @@ module.exports = {
     SEVERITY_LEVELS,
     buildReviewSystemPrompt,
     buildReviewUserPrompt,
+    buildReviewUserPromptWithContext,
+    buildFollowUpContextMessage,
     buildFixPrompt,
 };
+

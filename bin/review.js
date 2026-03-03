@@ -8,6 +8,8 @@ const { reviewCode, parseSeverityCounts, detectProvider, PROVIDERS, DEFAULT_MODE
 const { buildFixPrompt } = require('../src/prompts');
 const { loadConfig } = require('../src/config');
 const { writeReviewOutput, writeFixPrompt, findLatestReview } = require('../src/output');
+const { buildInitialContext, formatContextForPrompt } = require('../src/context');
+const { installHook, uninstallHook, hookStatus } = require('../src/hooks');
 
 // ─── Argument Parsing ────────────────────────────────────────────────
 
@@ -45,10 +47,15 @@ function parseArgs(argv) {
             case '-h':
                 flags.help = true;
                 break;
+            case '--skip-review':
+                flags.skipReview = true;
+                break;
             default:
                 if (!args[i].startsWith('-') && !command) {
                     command = args[i];
-                } else {
+                } else if (!args[i].startsWith('-') && command === 'hook') {
+                    // Hook subcommands are parsed separately
+                } else if (args[i].startsWith('-')) {
                     console.warn(`Unknown option: ${args[i]}`);
                 }
         }
@@ -65,11 +72,14 @@ function showHelp() {
 ║              🤖 AI Code Review CLI                   ║
 ╚══════════════════════════════════════════════════════╝
 
-Usage: ai-review <command> [options]
+Usage: git-diff-ai-reviewer <command> [options]
 
 Commands:
-  review    Review code changes using AI (default)
-  fix       Generate a fix prompt from the latest review
+  review          Review code changes using AI (default)
+  fix             Generate a fix prompt from the latest review
+  hook install    Install pre-push git hook (review before push)
+  hook uninstall  Remove the pre-push git hook
+  hook status     Check if the pre-push hook is installed
 
 Options:
   -b, --base <branch>      Base branch to compare against (default: main)
@@ -94,12 +104,19 @@ Review Rule Presets:
   standard        Balanced everyday review (default)
   comprehensive   Full audit for critical code
 
+Pre-Push Hook:
+  Install:   git-diff-ai-reviewer hook install
+  Uninstall: git-diff-ai-reviewer hook uninstall
+  Skip once: GIT_SKIP_REVIEW=1 git push
+  Skip once: git push --no-verify
+
 Examples:
-  ai-review review                          Review with auto-detected provider
-  ai-review review --provider gemini        Review using Gemini
-  ai-review review --base develop           Review against develop branch
-  ai-review review --dry-run                Preview without calling API
-  ai-review fix                             Generate fix prompt from latest review
+  git-diff-ai-reviewer review                    Review with auto-detected provider
+  git-diff-ai-reviewer review --provider gemini   Review using Gemini
+  git-diff-ai-reviewer review --base develop      Review against develop branch
+  git-diff-ai-reviewer review --dry-run           Preview without calling API
+  git-diff-ai-reviewer fix                        Generate fix prompt from latest review
+  git-diff-ai-reviewer hook install               Enable review-on-push
 
 Config File (.ai-review.config.json):
   {
@@ -107,6 +124,7 @@ Config File (.ai-review.config.json):
     "baseBranch": "main",
     "model": "",
     "maxTokens": 4096,
+    "maxContextRounds": 3,
     "outputDir": "./reviews",
     "reviewRules": "standard"
   }
@@ -150,14 +168,30 @@ async function commandReview(config, flags) {
     console.log(`  Diff size:  ${diff.length} characters`);
     console.log('─'.repeat(40));
 
+    // Gather code context
+    console.log('\n📦 Gathering code context...');
+    const context = buildInitialContext(diff, changedFiles);
+    const formattedContext = formatContextForPrompt(context);
+
+    const contextFunctions = context.files.reduce((sum, f) => sum + f.functions.length, 0);
+    const contextCallers = context.files.reduce((sum, f) => sum + f.callers.length, 0);
+    console.log(`   ${contextFunctions} function(s) extracted, ${contextCallers} caller group(s) found`);
+    if (formattedContext) {
+        console.log(`   Context size: ${formattedContext.length} characters`);
+    }
+
     // Dry run mode — show what would be sent
     if (flags.dryRun) {
         console.log('\n📋 DRY RUN — Diff extracted, API not called.\n');
         console.log(`Provider: ${provider} | Model: ${model}`);
         console.log(`Rules:    ${config.reviewRules.length} active`);
+        console.log(`Context:  ${contextFunctions} function(s), ${contextCallers} caller group(s)`);
         console.log('Changed files:');
         changedFiles.forEach(f => console.log(`  - ${f}`));
         console.log(`\nDiff preview (first 500 chars):\n${diff.slice(0, 500)}...`);
+        if (formattedContext) {
+            console.log(`\nContext preview (first 500 chars):\n${formattedContext.slice(0, 500)}...`);
+        }
         console.log('\n💡 Remove --dry-run to send to AI for review.');
         process.exit(0);
     }
@@ -173,6 +207,8 @@ async function commandReview(config, flags) {
             model,
             maxTokens: config.maxTokens,
             reviewRules: config.reviewRules,
+            formattedContext,
+            maxContextRounds: config.maxContextRounds,
         });
 
         // Parse severity counts
@@ -245,6 +281,67 @@ async function commandFix(config, flags) {
     console.log('');
 }
 
+// ─── Hook Command ───────────────────────────────────────────────────
+
+function commandHook(subcommand) {
+    switch (subcommand) {
+        case 'install': {
+            const result = installHook();
+            if (result.success) {
+                console.log('');
+                console.log('✅ ' + result.message);
+                console.log(`   📄 ${result.path}`);
+                console.log('');
+                console.log('   The AI review will run automatically before each push.');
+                console.log('   To skip a review:');
+                console.log('     GIT_SKIP_REVIEW=1 git push');
+                console.log('     git push --no-verify');
+                console.log('');
+            } else {
+                console.error('');
+                console.error('❌ ' + result.message);
+                console.error('');
+                process.exit(1);
+            }
+            break;
+        }
+        case 'uninstall': {
+            const result = uninstallHook();
+            if (result.success) {
+                console.log('');
+                console.log('✅ ' + result.message);
+                console.log('');
+            } else {
+                console.error('');
+                console.error('❌ ' + result.message);
+                console.error('');
+                process.exit(1);
+            }
+            break;
+        }
+        case 'status': {
+            const result = hookStatus();
+            console.log('');
+            if (!result.installed) {
+                console.log('📋 Pre-push hook: not installed');
+                console.log('   Run "git-diff-ai-reviewer hook install" to enable.');
+            } else if (result.ours) {
+                console.log('📋 Pre-push hook: ✅ installed (by git-diff-ai-reviewer)');
+                console.log(`   📄 ${result.path}`);
+            } else {
+                console.log('📋 Pre-push hook: ⚠️  installed (by another tool)');
+                console.log(`   📄 ${result.path}`);
+            }
+            console.log('');
+            break;
+        }
+        default:
+            console.error('❌ Unknown hook subcommand: ' + (subcommand || '(none)'));
+            console.error('   Usage: git-diff-ai-reviewer hook <install|uninstall|status>');
+            process.exit(1);
+    }
+}
+
 // ─── Main ───────────────────────────────────────────────────────────
 
 async function main() {
@@ -264,6 +361,15 @@ async function main() {
     // Load config
     const config = loadConfig(flags.configPath);
 
+    // Handle 'hook' command — parse subcommand from argv
+    if (command === 'hook') {
+        const args = process.argv.slice(2);
+        const hookIdx = args.indexOf('hook');
+        const subcommand = args[hookIdx + 1];
+        commandHook(subcommand);
+        return;
+    }
+
     switch (command) {
         case 'review':
             await commandReview(config, flags);
@@ -273,7 +379,7 @@ async function main() {
             break;
         default:
             console.error(`❌ Unknown command: ${command}`);
-            console.error('   Run "ai-review --help" for usage info.');
+            console.error('   Run "git-diff-ai-reviewer --help" for usage info.');
             process.exit(1);
     }
 }

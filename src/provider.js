@@ -51,6 +51,8 @@ function detectProvider(config) {
  * @param {string} [options.model]
  * @param {number} [options.maxTokens]
  * @param {string[]} [options.reviewRules]
+ * @param {string} [options.formattedContext] - Pre-formatted context string
+ * @param {number} [options.maxContextRounds] - Max follow-up context rounds
  * @returns {Promise<string>} Review text
  */
 async function reviewCode(diff, options = {}) {

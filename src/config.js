@@ -11,6 +11,7 @@ const DEFAULT_CONFIG = {
     maxTokens: 4096,
     outputDir: './reviews',
     reviewRules: 'standard',  // preset name ('basic', 'standard', 'comprehensive') or custom array
+    maxContextRounds: 3,      // max follow-up context rounds for iterative review
 };
 
 /**
