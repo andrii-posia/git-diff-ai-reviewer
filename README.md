@@ -5,7 +5,11 @@ AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git bra
 ## Installation
 
 ```bash
-npm install ai-code-review
+# From npm (recommended)
+npm install --save-dev ai-code-review
+
+# Or directly from GitHub
+npm install --save-dev github:andrii-posia/ai-review
 ```
 
 Then install **only the SDK for the provider you want to use**:
