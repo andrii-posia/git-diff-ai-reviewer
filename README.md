@@ -4,6 +4,8 @@ AI-powered code review tool using **Claude** or **Gemini** APIs. Reviews git bra
 
 ## Installation
 
+> **`--save-dev` is correct** — this is a development tool (like ESLint or Prettier) used only during development and CI. It should never be in your production bundle.
+
 ```bash
 # From npm (recommended)
 npm install --save-dev ai-code-review
@@ -12,17 +14,18 @@ npm install --save-dev ai-code-review
 npm install --save-dev github:andrii-posia/ai-review
 ```
 
-Then install **only the SDK for the provider you want to use**:
+Then install **only the SDK for the provider you want to use** (also as devDependencies):
 
 ```bash
 # If using Claude (Anthropic)
-npm install @anthropic-ai/sdk
+npm install --save-dev @anthropic-ai/sdk
 
 # If using Gemini (Google)
-npm install @google/genai
+npm install --save-dev @google/genai
 
 # If you want both available
-npm install @anthropic-ai/sdk @google/genai
+npm install --save-dev @anthropic-ai/sdk @google/genai
+
 ```
 
 > Neither SDK is installed automatically. You only pay for what you use.
