@@ -136,7 +136,10 @@ Create `.ai-review.config.json` in your project root:
   "model": "gemini-2.0-flash",
   "maxTokens": 4096,
   "outputDir": "./reviews",
-  "reviewRules": "standard"
+  "reviewRules": {
+    "preset": "standard",
+    "extend": []
+  }
 }
 ```
 
@@ -153,15 +156,30 @@ Create `.ai-review.config.json` in your project root:
 
 ### Custom Rules Example
 
+You can completely replace the rules by providing an array:
+
 ```json
 {
   "provider": "gemini",
   "reviewRules": [
     "Use camelCase for variable names",
-    "All functions must have JSDoc comments",
-    "No inline styles in React components",
-    "Database queries must use parameterized statements"
+    "All functions must have JSDoc comments"
   ]
+}
+```
+
+Or **extend** an existing preset with your own project-specific rules:
+
+```json
+{
+  "provider": "gemini",
+  "reviewRules": {
+    "preset": "standard",
+    "extend": [
+      "No inline styles in React components",
+      "Database queries must use parameterized statements"
+    ]
+  }
 }
 ```
 
@@ -183,7 +201,10 @@ const review = await reviewCode(diff, {
   provider,
   changedFiles: files,
   branchName: 'feature/xyz',
-  reviewRules: STANDARD_RULES,
+  reviewRules: {
+    preset: 'standard',
+    extend: ['Check that all functions are properly documented']
+  },
 });
 ```
 

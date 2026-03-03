@@ -85,6 +85,12 @@ function resolveRules(rulesConfig) {
         return rulesConfig;
     }
 
+    if (typeof rulesConfig === 'object' && !Array.isArray(rulesConfig)) {
+        const base = resolveRules(rulesConfig.preset || 'standard');
+        const custom = Array.isArray(rulesConfig.extend) ? rulesConfig.extend : [];
+        return [...base, ...custom];
+    }
+
     return STANDARD_RULES;
 }
 
