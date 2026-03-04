@@ -3,7 +3,7 @@
 require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
-const { getDiff, getChangedFiles, getBranchName, isGitRepo } = require('../src/git');
+const { getDiff, getChangedFiles, getBranchName, isGitRepo, resolveBaseRef } = require('../src/git');
 const { reviewCode, parseSeverityCounts, detectProvider, PROVIDERS, DEFAULT_MODELS } = require('../src/provider');
 const { buildFixPrompt } = require('../src/prompts');
 const { loadConfig } = require('../src/config');
@@ -149,8 +149,12 @@ async function commandReview(config, flags) {
 
     // Get branch and diff info
     const branchName = getBranchName();
+    const { ref: effectiveBase, isRemote } = resolveBaseRef(baseBranch);
     console.log(`  Branch:     ${branchName}`);
-    console.log(`  Base:       ${baseBranch}`);
+    console.log(`  Base:       ${effectiveBase}`);
+    if (!isRemote) {
+        console.log(`  ⚠ Remote origin/${baseBranch} not found — using local ref`);
+    }
 
     const changedFiles = getChangedFiles(baseBranch);
     if (changedFiles.length === 0) {

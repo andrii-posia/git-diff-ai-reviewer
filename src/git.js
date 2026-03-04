@@ -1,22 +1,48 @@
 const { execSync } = require('child_process');
 
 /**
- * Get the diff between the current branch and a base branch.
+ * Resolve the effective base ref for diff comparison.
+ * Always prefers the remote version of the base branch (e.g. origin/main)
+ * so the diff reflects what will actually change on the remote after push.
+ * Falls back to the local branch name when the remote ref doesn't exist
+ * (e.g. first push of a new repo).
+ * @param {string} baseBranch - The configured base branch name
+ * @param {string} cwd - Working directory
+ * @returns {{ ref: string, isRemote: boolean }} The ref to diff against
+ */
+function resolveBaseRef(baseBranch, cwd = process.cwd()) {
+    // Try origin/<baseBranch> first
+    try {
+        execSync(`git rev-parse --verify origin/${baseBranch}`, {
+            cwd,
+            encoding: 'utf-8',
+            stdio: ['pipe', 'pipe', 'pipe'],
+        });
+        return { ref: `origin/${baseBranch}`, isRemote: true };
+    } catch {
+        // Remote ref doesn't exist — fall back to local branch
+        return { ref: baseBranch, isRemote: false };
+    }
+}
+
+/**
+ * Get the diff between the current branch and the remote base branch.
  * @param {string} baseBranch - The base branch to compare against (default: 'main')
  * @param {string} cwd - Working directory (default: process.cwd())
  * @returns {string} The git diff output
  */
 function getDiff(baseBranch = 'main', cwd = process.cwd()) {
     try {
-        // First try three-dot diff (for branch comparison)
-        const diff = execSync(`git diff ${baseBranch}...HEAD`, {
+        const { ref } = resolveBaseRef(baseBranch, cwd);
+
+        const diff = execSync(`git diff ${ref}...HEAD`, {
             cwd,
             encoding: 'utf-8',
-            maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large diffs
+            maxBuffer: 10 * 1024 * 1024,
         });
 
         if (!diff.trim()) {
-            // Fallback: try two-dot diff (for uncommitted changes)
+            // Fallback: uncommitted changes
             const uncommitted = execSync('git diff HEAD', {
                 cwd,
                 encoding: 'utf-8',
@@ -24,7 +50,6 @@ function getDiff(baseBranch = 'main', cwd = process.cwd()) {
             });
 
             if (!uncommitted.trim()) {
-                // Also check staged changes
                 const staged = execSync('git diff --cached', {
                     cwd,
                     encoding: 'utf-8',
@@ -42,14 +67,16 @@ function getDiff(baseBranch = 'main', cwd = process.cwd()) {
 }
 
 /**
- * Get list of changed files between current branch and base branch.
+ * Get list of changed files between current branch and the remote base branch.
  * @param {string} baseBranch - The base branch to compare against
  * @param {string} cwd - Working directory
  * @returns {string[]} Array of changed file paths
  */
 function getChangedFiles(baseBranch = 'main', cwd = process.cwd()) {
     try {
-        const output = execSync(`git diff --name-only ${baseBranch}...HEAD`, {
+        const { ref } = resolveBaseRef(baseBranch, cwd);
+
+        const output = execSync(`git diff --name-only ${ref}...HEAD`, {
             cwd,
             encoding: 'utf-8',
         });
@@ -110,4 +137,5 @@ module.exports = {
     getChangedFiles,
     getBranchName,
     isGitRepo,
+    resolveBaseRef,
 };
