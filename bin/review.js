@@ -242,11 +242,11 @@ async function commandReview(config, flags) {
 
         // Exit with non-zero if critical issues found
         if (severityCounts.critical > 0) {
-            process.exit(1);
+            process.exitCode = 1;
         }
     } catch (error) {
         console.error(`\n❌ Review failed: ${error.message}`);
-        process.exit(2);
+        process.exitCode = 2;
     }
 }
 
@@ -390,5 +390,5 @@ async function main() {
 
 main().catch(err => {
     console.error(`\n❌ Unexpected error: ${err.message}`);
-    process.exit(2);
+    process.exitCode = 2;
 });
