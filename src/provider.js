@@ -14,7 +14,7 @@ const PROVIDERS = {
  */
 const DEFAULT_MODELS = {
     [PROVIDERS.CLAUDE]: 'claude-sonnet-4-20250514',
-    [PROVIDERS.GEMINI]: 'gemini-2.0-flash',
+    [PROVIDERS.GEMINI]: 'gemini-3.1-flash-lite-preview',
 };
 
 /**
