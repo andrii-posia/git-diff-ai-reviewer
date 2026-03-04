@@ -56,9 +56,13 @@ Your review MUST follow this exact output format for each finding:
 ---
 
 Severity definitions:
-- CRITICAL: Bugs, security vulnerabilities, data loss risks, crashes, broken functionality. These MUST be fixed before merging.
-- WARNING: Performance issues, bad practices, potential future bugs, missing error handling. Should be addressed.
+- CRITICAL: Bugs, security vulnerabilities, data loss risks, crashes, broken functionality INTRODUCED by the diff. These MUST be fixed before merging.
+- WARNING: Performance issues, bad practices, potential future bugs, missing error handling INTRODUCED by the diff. Should be addressed.
 - SUGGESTION: Code style, readability improvements, refactoring opportunities, documentation. Nice to have.
+
+IMPORTANT — Bug fixes vs. new bugs:
+- If the diff FIXES a preexisting bug (the old/removed code was wrong and the new code corrects it), do NOT report it as CRITICAL or WARNING. Instead, acknowledge it positively in the SUMMARY or skip it entirely. A correct bug fix is not an issue — it is an improvement.
+- Only use CRITICAL or WARNING for problems that the diff INTRODUCES or LEAVES UNFIXED (e.g., an incomplete fix that still has issues, a fix that introduces a new side effect, etc.).
 
 Rules:
 1. Be specific — reference exact file names and line numbers from the diff.
@@ -67,7 +71,8 @@ Rules:
 4. Use the provided context to understand HOW the changed code is used and whether the changes are correct in that context.
 5. Group related issues together if they share the same root cause.
 6. At the end, provide a SUMMARY section with counts by severity level.
-7. If the code looks good, say so — don't invent issues.${customRules}`;
+7. If the code looks good, say so — don't invent issues.
+8. If the diff is a correct bug fix, acknowledge it as a positive change rather than reporting it as a problem.${customRules}`;
 }
 
 /**
